@@ -1,4 +1,4 @@
-# DVR-Security-Report
+# Documentacion del Repositorio
 
 Este repositorio contiene el informe, documentación técnica, scripts de pruebas y parches aplicados al proyecto **Damn Vulnerable RESTaurant API Game**, como parte del análisis de seguridad en APIs REST.
 
