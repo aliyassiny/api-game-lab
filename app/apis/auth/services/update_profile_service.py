@@ -3,7 +3,7 @@ from typing import Union
 from apis.auth.utils import get_current_user, get_user_by_username
 from db.models import User
 from db.session import get_db
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from typing_extensions import Annotated
@@ -24,10 +24,24 @@ def update_profile(
     current_user: Annotated[User, Depends(get_current_user)],
     db: Session = Depends(get_db),
 ):
+    # se agrego "from fastapi import APIRouter, Depends, HTTPException, status" a las importaciones
+    # prevenir IDOR 
+    if current_user.username != user.username:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Cannot modify other user's profile"
+        )
+
+    # obtener el usuario objetivo (ya verificado que coincide con el actual)
     db_user = get_user_by_username(db, user.username)
+    if not db_user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
 
     for var, value in user.dict().items():
-        if value:
+        if value and var != "username":  
             setattr(db_user, var, value)
 
     db.add(db_user)
